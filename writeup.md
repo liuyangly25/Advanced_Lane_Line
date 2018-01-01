@@ -1,6 +1,6 @@
 ## Advanced Lane Finding Project Writeup
 
-### 2017/12/27.
+### 2017/12/31.
 
 ---
 
@@ -47,8 +47,6 @@ You're reading it!
 
 The code for this step is contained in the 3 code cell of the IPython notebook located in "./line.ipynb".
 
-In the first cell, I import libraries and display the images that will be used for camera calibration.
-
 I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
@@ -64,7 +62,9 @@ To demonstrate this step, I will describe how I apply the distortion correction 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (cell 4 in `line.ipynb` and a function called "pipeline()").  Here's an example of my output for this step. 
+I used a combination of color and gradient thresholds to generate a binary image (cell 4 in `line.ipynb` and a function called "final_filter()").  Here's an example of my output for this step. 
+
+For yellow line, I created a Lab color space filter with threshold 170 - 255. For white line, I created a LUV color space filter with threshold 215 - 255. Then I combined these two filters using 'or' operation and then combined gradient filter using 'and'.
 
 ![alt text][image3]
 
@@ -73,7 +73,7 @@ I used a combination of color and gradient thresholds to generate a binary image
 The code for my perspective transform includes a function called `p_trans()`, which appears in cell 9 in `line.ipynb` The `p_trans()` function takes as inputs an image (`img`) and M matrix(`M`), `M` was calulated by a function called `cv2.getPerspectiveTransform`. it takes source (`src`) and destination (`dst`) points as input.  I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32([[261, 680], [1041,680], [750, 492], [535, 492]])
+src = np.float32([[261, 680], [1041,680], [752, 492], [533, 492]])
 dst = np.float32([[350, 680], [900,680],[900, 492], [350, 492]])
 ```
 
@@ -83,8 +83,8 @@ This resulted in the following source and destination points:
 |:-------------:|:-------------:| 
 | 261, 680      | 350, 680      | 
 | 1041, 680     | 900, 680      |
-| 750, 492      | 900, 492      |
-| 535, 492      | 350, 492      |
+| 752, 492      | 900, 492      |
+| 533, 492      | 350, 492      |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
@@ -194,7 +194,7 @@ class Line():
         self.ally = None
         #if it is the first frame
         self.first_frame = True 
-        self.max_len = 5
+        self.max_len = 3
         self.bad_counter = 0
     def empty(self):
         while self.recent_xfitted:
